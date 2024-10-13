@@ -4,7 +4,8 @@ import { MercadoPagoConfig, Preference } from "mercadopago";
 
 // Configurando as credenciais do Mercado Pago
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN, // Atualize com seu token
+  accessToken:
+    "APP_USR-566102297275382-101310-c7a1d3546948113f7ec07a10e33893c9-2032928969", // Atualize com seu token
 });
 
 const app = express();
@@ -22,7 +23,7 @@ app.post("/create_preference", async (req, res) => {
   try {
     console.log("Dados recebidos:", req.body);
 
-    const { items, total_amount } = req.body;
+    const { items, shippingCost } = req.body;
 
     const body = {
       items: items.map((item) => ({
@@ -43,15 +44,8 @@ app.post("/create_preference", async (req, res) => {
       ), // Total da transação
 
       shipments: {
-        cost: 40, // Valor do frete em centavos (R$ 40,00)
+        cost: shippingCost, // Valor do frete em centavos (R$ 40,00)
         mode: "not_specified",
-      },
-      address: {
-        street_name: "Rua Exemplo",
-        street_number: "123",
-        zip_code: "12345678",
-        state: "SP",
-        city: "São Paulo",
       },
     };
 
