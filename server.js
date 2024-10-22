@@ -54,7 +54,7 @@ app.post("/create_preference", async (req, res) => {
           zip_code: deliveryData.cep,
           city: deliveryData.cidade,
           state: deliveryData.estado,
-          country: "BR"
+          country: "BRR"
         },
       },
     };
