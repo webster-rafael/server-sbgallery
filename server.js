@@ -25,7 +25,7 @@ app.post("/create_preference", async (req, res) => {
   try {
     console.log("Dados recebidos:", req.body);
 
-    const { items, shippingCost } = req.body;
+    const { items, shippingCost, deliveryData } = req.body;
 
     const body = {
       items: items.map((item) => ({
@@ -35,7 +35,7 @@ app.post("/create_preference", async (req, res) => {
         currency_id: "BRL", // Definindo a moeda como BRL
       })),
       back_urls: {
-        success: "http://localhost:8080/feedback", // Atualize com seu URL de sucesso
+        success: "https://server-sbgallery.onrender.com/feedback", // Atualize com seu URL de sucesso
         failure: "http://localhost:8080/feedback", // Atualize com seu URL de falha
         pending: "http://localhost:8080/feedback", // Atualize com seu URL de pendente
       },
@@ -48,6 +48,14 @@ app.post("/create_preference", async (req, res) => {
       shipments: {
         cost: shippingCost, // Valor do frete em centavos (R$ 40,00)
         mode: "not_specified",
+        receiver_address: {
+          street_name: deliveryData.endereco,
+          street_number: deliveryData.numero,
+          zip_code: deliveryData.cep,
+          city: deliveryData.cidade,
+          state: deliveryData.estado,
+          country: "BR"
+        },
       },
     };
 
