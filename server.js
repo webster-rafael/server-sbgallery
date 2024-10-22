@@ -85,5 +85,5 @@ app.get("/feedback", (req, res) => {
 
 // Iniciando o servidor na porta 8080
 app.listen(port, () => {
-  console.log(`O servidor está rodando na porta ${port}`);
+  console.log(`Ola, servidor está rodando na porta ${port}`);
 });
