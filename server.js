@@ -144,7 +144,7 @@ app.get("/feedback", async (req, res) => {
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: "webster.dev2024@gmail.com", // Seu e-mail
+      to: `${deliveryData.email}, ${process.env.EMAIL_USER}`, // Seu e-mail
       subject: "Novo Pedido Aprovado",
       text: `Dados do Endereço:
       Nome: ${deliveryData.nome}
@@ -153,6 +153,7 @@ app.get("/feedback", async (req, res) => {
       Estado: ${deliveryData.estado}
       CEP: ${deliveryData.cep}
       Telefone: ${deliveryData.telefone}
+      E-mail: ${deliveryData.email}
 
       Itens Comprados:
       ${itemsDetails}
