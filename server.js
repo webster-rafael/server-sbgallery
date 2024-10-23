@@ -120,8 +120,6 @@ app.get("/order/:id", async (req, res) => {
     });
   }
 });
-
-// Endpoint de feedback após o pagamento
 app.get("/feedback", async (req, res) => {
   const { payment_id, status, merchant_order_id } = req.query;
 
@@ -161,23 +159,25 @@ app.get("/feedback", async (req, res) => {
       Itens Comprados:
       ${itemsDetails}
 
-      Valor do Frete: R$ ${shippingCost.toFixed(2)}`, // Adicione o valor do frete
+      Valor do Frete: R$ ${shippingCost.toFixed(2)}`,
     };
 
     try {
       // Enviar e-mail
       await transporter.sendMail(mailOptions);
       console.log("E-mail enviado com sucesso!");
+
+      // Redireciona para a página após o envio do e-mail
+      return res.redirect("https://sb-gallery.vercel.app/home");
     } catch (error) {
       console.error("Erro ao enviar o e-mail:", error);
+      // Opcional: Redirecionar mesmo em caso de erro no envio do e-mail
+      return res.redirect("https://sb-gallery.vercel.app/home");
     }
   }
 
-  res.json({
-    Payment: payment_id,
-    Status: status,
-    MerchantOrder: merchant_order_id,
-  });
+  // Redireciona em caso de status diferente de "approved"
+  return res.redirect("https://sb-gallery.vercel.app/home");
 });
 
 const transporter = nodemailer.createTransport({
