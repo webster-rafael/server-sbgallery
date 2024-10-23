@@ -146,7 +146,7 @@ app.get("/feedback", async (req, res) => {
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: "seu-email@dominio.com", // Seu e-mail
+      to: "sbgallerybrazil@gmail.com", // Seu e-mail
       subject: "Novo Pedido Aprovado",
       text: `Dados do Endereço:
       Nome: ${deliveryData.nome}
@@ -172,7 +172,7 @@ app.get("/feedback", async (req, res) => {
     } catch (error) {
       console.error("Erro ao enviar o e-mail:", error);
       // Opcional: Redirecionar mesmo em caso de erro no envio do e-mail
-      return res.redirect("https://sb-gallery.vercel.app/home");
+      return res.redirect("https://sb-gallery.vercel.app/error");
     }
   }
 
