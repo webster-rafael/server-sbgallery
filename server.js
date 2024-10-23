@@ -43,7 +43,7 @@ app.post("/create_preference", async (req, res) => {
         currency_id: "BRL", // Definindo a moeda como BRL
       })),
       back_urls: {
-        success: "https://server-sbgallery.onrender.com/feedback", // Atualize com seu URL de sucesso
+        success: "https://server-sbgallery.vercel.app/feedback", // Atualize com seu URL de sucesso
         failure: "https://sb-gallery.vercel.app/error", // Atualize com seu URL de falha
         pending: "https://sb-gallery.vercel.app/error", // Atualize com seu URL de pendente
       },
