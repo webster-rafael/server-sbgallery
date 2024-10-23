@@ -164,10 +164,10 @@ app.get("/feedback", async (req, res) => {
     try {
       // Enviar e-mail
       await transporter.sendMail(mailOptions);
-      console.log("E-mail enviado com sucesso!!");
+      console.log("E-mail enviado com sucesso!");
 
       // Redireciona para a página após o envio do e-mail
-      return res.redirect("https://sb-gallery.vercel.app/home");
+      return res.redirect("https://sb-gallery.vercel.app/cart");
     } catch (error) {
       console.error("Erro ao enviar o e-mail:", error);
       // Opcional: Redirecionar mesmo em caso de erro no envio do e-mail
