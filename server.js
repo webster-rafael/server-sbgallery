@@ -30,7 +30,7 @@ app.post("/create_preference", async (req, res) => {
   try {
     console.log("Dados recebidos:", req.body);
 
-    const { items, shippingCost, deliveryData } = req.body;
+    const { items, shippingCost, deliveryData, totalAmount } = req.body;
     lastDeliveryData = deliveryData;
     lastItems = items;
     lastShipCoast = shippingCost;
@@ -48,11 +48,9 @@ app.post("/create_preference", async (req, res) => {
         pending: "https://sb-gallery.vercel.app/error", // Atualize com seu URL de pendente
       },
       auto_return: "approved",
-      transaction_amount: items.reduce(
-        (total, item) => total + item.unit_price * item.quantity,
-        0
-      ), // Total da transação
+      transaction_amount: totalAmount,
       shipments: {
+        cost: lastShipCoast,
         mode: "not_specified",
         receiver_address: {
           id: "1", // Adicione um ID fictício ou use um gerador de IDs
@@ -146,7 +144,7 @@ app.get("/feedback", async (req, res) => {
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: "sbgallerybrazil@gmail.com", // Seu e-mail
+      to: "webster.dev2024@gmail.com", // Seu e-mail
       subject: "Novo Pedido Aprovado",
       text: `Dados do Endereço:
       Nome: ${deliveryData.nome}
