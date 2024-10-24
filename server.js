@@ -176,20 +176,22 @@ export async function sendEmail(deliveryData, items, shippingCost) {
 
 app.get("/compraConcluida", async (req, res) => {
   const { status } = req.query;
+
+  // Verifica se o status é aprovado
   if (status === "approved") {
-    if (!lastDeliveryData || !lastDeliveryData.email) {
-      console.error("Dados do endereço incompletos:", lastDeliveryData);
-      return res.status(400).send("Dados do endereço incompletos.");
-    }
+    // Usa os dados do último pedido
     await sendEmail(lastDeliveryData, lastItems, lastShipCoast);
     res.redirect("https://sb-gallery.vercel.app/compraConcluida");
+
+    res.send("E-mail enviado com sucesso!");
   } else {
     res.send("Pagamento não aprovado.");
   }
 });
 
+// Inicia o servidor
 app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
+  console.log(`Servidor rodando na porta ${port} :)`);
 });
-
+// Expor as rotas como funções serverless
 export default app;
