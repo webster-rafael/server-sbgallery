@@ -2,7 +2,7 @@ import express from "express";
 import axios from "axios";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { sendEmail } from "./server.js"; // Altere para o caminho correto
+import { sendEmail,setLastOrderData  } from "./server.js"; // Altere para o caminho correto
 
 dotenv.config();
 
