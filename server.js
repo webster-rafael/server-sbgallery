@@ -181,7 +181,5 @@ export async function sendEmail() {
   }
 }
 
-// Iniciando o servidor na porta 8080
-app.listen(port, () => {
-  console.log(`O servidor está rodando na porta ${port}`);
-});
+// Exporte o servidor
+module.exports = server;
