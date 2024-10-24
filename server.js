@@ -52,7 +52,7 @@ app.post("/create_preference", async (req, res) => {
         pending: "https://sb-gallery.vercel.app/compraConcluida",
       },
       transaction_amount: totalAmount,
-      auto_return: "all",
+      auto_return: "approved",
       shipments: {
         cost: 0,
         mode: "not_specified",
@@ -138,7 +138,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendEmail(lastDeliveryData, items, shippingCost) {
+export async function sendEmail(deliveryData, items, shippingCost) {
   const itemsDetails = items
     .map((item) => {
       return `Produto: ${item.title}\nQuantidade: ${
@@ -149,16 +149,16 @@ export async function sendEmail(lastDeliveryData, items, shippingCost) {
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: `${lastDeliveryData.email}, ${process.env.EMAIL_USER}`,
+    to: `${deliveryData.email}, ${process.env.EMAIL_USER}`,
     subject: "Novo Pedido Aprovado",
     text: `Dados do Endereço:
-    Nome: ${lastDeliveryData.nome}
-    Endereço: ${lastDeliveryData.endereco}, ${lastDeliveryData.numero}
-    Cidade: ${lastDeliveryData.cidade}
-    Estado: ${lastDeliveryData.estado}
-    CEP: ${lastDeliveryData.cep}
-    Telefone: ${lastDeliveryData.telefone}
-    E-mail: ${lastDeliveryData.email}
+    Nome: ${deliveryData.nome}
+    Endereço: ${deliveryData.endereco}, ${deliveryData.numero}
+    Cidade: ${deliveryData.cidade}
+    Estado: ${deliveryData.estado}
+    CEP: ${deliveryData.cep}
+    Telefone: ${deliveryData.telefone}
+    E-mail: ${deliveryData.email}
 
     Itens Comprados:
     ${itemsDetails}
@@ -191,7 +191,7 @@ app.get("/compraConcluida", async (req, res) => {
 
 // Inicia o servidor
 app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port} :)`);
+  console.log(`Servidor rodando na porta ${port}`);
 });
 // Expor as rotas como funções serverless
 export default app;
