@@ -56,7 +56,7 @@ app.post("/create_preference", async (req, res) => {
       auto_return: "all",
       transaction_amount: totalAmount,
       shipments: {
-        cost: 0,
+        cost: 1,
         mode: "not_specified",
         receiver_address: {
           id: "1",
@@ -142,7 +142,9 @@ const transporter = nodemailer.createTransport({
 });
 
 // Função para enviar o e-mail
-export async function sendEmail(deliveryData, items, shippingCost) {
+export async function sendEmail() {
+  const deliveryData = lastDeliveryData;
+  const shippingCost = lastShipCoast;
 
   const itemsDetails = lastItems
     .map((item) => {
@@ -179,7 +181,7 @@ export async function sendEmail(deliveryData, items, shippingCost) {
   }
 }
 
-// Exportando a função que o Vercel espera
-export default (req, res) => {
-  app(req, res);
-};
+// Iniciando o servidor na porta 8080
+app.listen(port, () => {
+  console.log(`O servidor está rodando na porta ${port}`);
+});
