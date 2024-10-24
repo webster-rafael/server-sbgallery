@@ -186,4 +186,4 @@ const server = app.listen(port, () => {
 });
 
 // Exporte o servidor
-module.exports = server;
+export default server;
