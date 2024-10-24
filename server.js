@@ -181,6 +181,7 @@ app.get("/compraConcluida", async (req, res) => {
   if (status === "approved") {
     // Usa os dados do último pedido
     await sendEmail(lastDeliveryData, lastItems, lastShipCoast);
+    res.redirect("https://sb-gallery.vercel.app/compraConcluida");
 
     res.send("E-mail enviado com sucesso!");
   } else {
