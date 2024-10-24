@@ -53,7 +53,7 @@ app.post("/create_preference", async (req, res) => {
         failure: "https://sb-gallery.vercel.app/error",
         pending: "https://sb-gallery.vercel.app/error",
       },
-      auto_return: "approved",
+      auto_return: "all",
       transaction_amount: totalAmount,
       shipments: {
         cost: 1,
