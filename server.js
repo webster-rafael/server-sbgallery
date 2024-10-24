@@ -177,11 +177,5 @@ export async function sendEmail() {
     console.error("Erro ao enviar o e-mail:", error);
   }
 }
-
-// Inicie o servidor
-const server = app.listen(port, () => {
-  console.log(`Servidor rodando na porta ${port}`);
-});
-
-// Exporte o servidor
-export default server;
+// Expor as rotas como funções serverless
+export default app;
