@@ -19,8 +19,6 @@ const port = 8080;
 let lastDeliveryData = null;
 let lastItems = [];
 let lastShipCoast = 0;
-let paymentStatus = null; // Armazena o status do pagamento
-let paymentId = null; // Armazena o ID do pagamento
 
 app.use(cors());
 app.use(express.json());
@@ -85,7 +83,7 @@ app.post("/create_preference", async (req, res) => {
       notification_url: "https://server-sbgallery.vercel.app/v1/webhook",
       customization: {
         visual: {
-          showExternalReference: true, // Define se a referência externa deve ser mostrada
+          showExternalReference: true,
         },
       },
     };
@@ -94,7 +92,6 @@ app.post("/create_preference", async (req, res) => {
 
     const preference = new Preference(client);
     const result = await preference.create({ body });
-    paymentId = result.id; // Armazena o ID da preferência
     console.log("Resultado da criação da preferência:", result);
     res.json({
       id: result.id,
@@ -181,6 +178,7 @@ export async function sendEmail() {
   }
 }
 
+// Inicie o servidor
 const server = app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });
