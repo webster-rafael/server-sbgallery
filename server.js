@@ -143,8 +143,6 @@ const transporter = nodemailer.createTransport({
 
 // Função para enviar o e-mail
 export async function sendEmail(deliveryData, items, shippingCost) {
-  const deliveryData = lastDeliveryData;
-  const shippingCost = lastShipCoast;
 
   const itemsDetails = lastItems
     .map((item) => {

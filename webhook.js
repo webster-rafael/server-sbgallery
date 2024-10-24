@@ -26,7 +26,9 @@ async function connectToDatabase() {
   }
 }
 
-connectToDatabase();
+beforeAll(async () => {
+  await connectToDatabase(); // Aguarda a conexão antes de todos os testes
+});
 
 router.post("/", async function (req, res) {
   console.log("POST V1 REQ>BODY");
@@ -97,7 +99,10 @@ router.post("/", async function (req, res) {
           error.response.data
         );
       } else {
-        console.error("Erro ao verificar o status do pagamento:", error.message);
+        console.error(
+          "Erro ao verificar o status do pagamento:",
+          error.message
+        );
       }
     }
   }
@@ -111,5 +116,5 @@ export function setLastOrderData(deliveryData, items, shippingCost) {
   lastItems = items;
   lastShipCoast = shippingCost;
 }
-
+export { connectToDatabase }; // Certifique-se de que está assim
 export default router;
