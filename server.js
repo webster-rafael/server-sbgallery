@@ -47,11 +47,10 @@ app.post("/create_preference", async (req, res) => {
         currency_id: "BRL",
       })),
       back_urls: {
-        success: "https://sb-gallery.vercel.app/compraConcluida",
-        failure: "https://sb-gallery.vercel.app/compraConcluida",
-        pending: "https://sb-gallery.vercel.app/compraConcluida",
+        success: "https://server-sbgallery.vercel.app/compraConcluida",
+        failure: "https://sb-gallery.vercel.app/error",
+        pending: "https://sb-gallery.vercel.app/error",
       },
-      auto_return: "all",
       transaction_amount: totalAmount,
       shipments: {
         cost: lastShipCoast,
@@ -138,12 +137,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Função para enviar o e-mail
-export async function sendEmail() {
-  const deliveryData = lastDeliveryData;
-  const shippingCost = lastShipCoast;
-
-  const itemsDetails = lastItems
+export async function sendEmail(deliveryData, items, shippingCost) {
+  const itemsDetails = items
     .map((item) => {
       return `Produto: ${item.title}\nQuantidade: ${
         item.quantity
@@ -177,5 +172,59 @@ export async function sendEmail() {
     console.error("Erro ao enviar o e-mail:", error);
   }
 }
+
+app.get("/compraConcluida", async (req, res) => {
+  const {
+    status,
+    merchant_order_id,
+    payment_id,
+    collection_id,
+    collection_status,
+    payment_type,
+    external_reference,
+    preference_id,
+    site_id,
+    processing_mode,
+    merchant_account_id,
+  } = req.query;
+
+  // Verifica se o status é aprovado
+  if (status === "approved") {
+    // Aqui você pode usar o merchant_order_id para obter informações adicionais, se necessário
+    const deliveryData = {
+      nome: "Nome do Comprador", // Substitua conforme necessário
+      endereco: "Endereço do Comprador", // Substitua conforme necessário
+      numero: "Número do Endereço", // Substitua conforme necessário
+      cidade: "Cidade do Comprador", // Substitua conforme necessário
+      estado: "Estado do Comprador", // Substitua conforme necessário
+      cep: "CEP do Comprador", // Substitua conforme necessário
+      telefone: "Telefone do Comprador", // Substitua conforme necessário
+      email: "email@exemplo.com", // Substitua conforme necessário
+    };
+
+    // Para os itens, você pode montar manualmente ou extraí-los de algum lugar
+    const items = [
+      {
+        title: "Produto Exemplo",
+        quantity: 1,
+        unit_price: 100.0, // Substitua conforme necessário
+      },
+    ];
+
+    const shippingCost = 10.0; // Substitua pelo custo de envio real, se necessário
+
+    // Envia o e-mail com os dados
+    await sendEmail(deliveryData, items, shippingCost);
+
+    res.send("E-mail enviado com sucesso!");
+  } else {
+    res.send("Pagamento não aprovado.");
+  }
+});
+
+// Inicia o servidor
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
+});
 // Expor as rotas como funções serverless
 export default app;
