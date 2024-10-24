@@ -1,11 +1,12 @@
 import express from "express";
 import cors from "cors";
 import { MercadoPagoConfig, Preference } from "mercadopago";
-import dotenv from "dotenv"; // Adicione esta linha
-import axios from "axios"; // Importando o Axios
+import dotenv from "dotenv";
+import axios from "axios";
 import nodemailer from "nodemailer";
+import webhookRouter, { setLastOrderData } from "./webhook.js";
 
-dotenv.config(); // Carrega as variáveis de ambiente
+dotenv.config();
 
 // Configurando as credenciais do Mercado Pago
 const client = new MercadoPagoConfig({
@@ -14,12 +15,16 @@ const client = new MercadoPagoConfig({
 
 const app = express();
 const port = 8080;
+
 let lastDeliveryData = null;
 let lastItems = [];
 let lastShipCoast = 0;
+let paymentStatus = null; // Armazena o status do pagamento
+let paymentId = null; // Armazena o ID do pagamento
 
 app.use(cors());
 app.use(express.json());
+app.use("/v1/webhook", webhookRouter);
 
 app.get("/", (req, res) => {
   res.send(`Olá, sou o servidor :)`);
@@ -31,6 +36,7 @@ app.post("/create_preference", async (req, res) => {
     console.log("Dados recebidos:", req.body);
 
     const { items, shippingCost, deliveryData, totalAmount } = req.body;
+    setLastOrderData(deliveryData, items, shippingCost);
     lastDeliveryData = deliveryData;
     lastItems = items;
     lastShipCoast = shippingCost;
@@ -39,41 +45,47 @@ app.post("/create_preference", async (req, res) => {
       items: items.map((item) => ({
         title: item.title,
         quantity: Number(item.quantity),
-        unit_price: Number(item.unit_price), // Garantindo que o preço seja um número
-        currency_id: "BRL", // Definindo a moeda como BRL
+        unit_price: Number(item.unit_price),
+        currency_id: "BRL",
       })),
       back_urls: {
-        success: "https://server-sbgallery.vercel.app/feedback", // Atualize com seu URL de sucesso
-        failure: "https://sb-gallery.vercel.app/error", // Atualize com seu URL de falha
-        pending: "https://sb-gallery.vercel.app/error", // Atualize com seu URL de pendente
+        success: "https://sb-gallery.vercel.app/compraConcluida",
+        failure: "https://sb-gallery.vercel.app/error",
+        pending: "https://sb-gallery.vercel.app/error",
       },
       auto_return: "approved",
       transaction_amount: totalAmount,
       shipments: {
-        cost: lastShipCoast,
+        cost: 1,
         mode: "not_specified",
         receiver_address: {
-          id: "1", // Adicione um ID fictício ou use um gerador de IDs
-          address_line: `${deliveryData.endereco}, ${deliveryData.numero}`, // Corrigido
+          id: "1",
+          address_line: `${deliveryData.endereco}, ${deliveryData.numero}`,
           street_name: deliveryData.endereco,
           street_number: deliveryData.numero,
           zip_code: deliveryData.cep,
           city: {
-            name: deliveryData.cidade, // Deve ser um objeto com a propriedade name
+            name: deliveryData.cidade,
           },
           state: {
-            id: "MS", // Use o ID apropriado para o estado
+            id: "MS",
             name: deliveryData.estado,
           },
           country: {
-            id: "BR", // ID do Brasil
+            id: "BR",
             name: "Brasil",
           },
-          latitude: "0.0", // Adicione valores fictícios se necessário
+          latitude: "0.0",
           longitude: "0.0",
-          comment: "Comentário fictício", // Comentário opcional
-          contact: deliveryData.nome, // Contato do destinatário
-          phone: deliveryData.telefone, // Telefone do destinatário
+          comment: "Comentário fictício",
+          contact: deliveryData.nome,
+          phone: deliveryData.telefone,
+        },
+      },
+      notification_url: "https://server-sbgallery.vercel.app/v1/webhook",
+      customization: {
+        visual: {
+          showExternalReference: true, // Define se a referência externa deve ser mostrada
         },
       },
     };
@@ -82,9 +94,11 @@ app.post("/create_preference", async (req, res) => {
 
     const preference = new Preference(client);
     const result = await preference.create({ body });
+    paymentId = result.id; // Armazena o ID da preferência
     console.log("Resultado da criação da preferência:", result);
     res.json({
       id: result.id,
+      init_point: result.init_point,
     });
   } catch (error) {
     console.log(error);
@@ -104,7 +118,7 @@ app.get("/order/:id", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.MERCADO_PAGO_ACCESS_TOKEN}`, // Use seu token
+          Authorization: `Bearer ${process.env.MERCADO_PAGO_ACCESS_TOKEN}`,
         },
       }
     );
@@ -118,74 +132,54 @@ app.get("/order/:id", async (req, res) => {
     });
   }
 });
-app.get("/feedback", async (req, res) => {
-  const { payment_id, status, merchant_order_id } = req.query;
-
-  if (status === "approved") {
-    // Verifique se lastDeliveryData e lastItems estão definidos
-    if (!lastDeliveryData || !lastItems) {
-      console.error("Dados de entrega ou itens não encontrados.");
-      return res
-        .status(400)
-        .json({ error: "Dados de entrega ou itens não encontrados." });
-    }
-
-    const deliveryData = lastDeliveryData;
-    const shippingCost = lastShipCoast;
-
-    // Formatar a mensagem com os itens comprados
-    const itemsDetails = lastItems
-      .map((item) => {
-        return `Produto: ${item.title}\nQuantidade: ${
-          item.quantity
-        }\nPreço: R$ ${item.unit_price.toFixed(2)}`;
-      })
-      .join("\n\n"); // Adiciona uma quebra de linha entre os itens
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: `${deliveryData.email}, ${process.env.EMAIL_USER}`, // Seu e-mail
-      subject: "Novo Pedido Aprovado",
-      text: `Dados do Endereço:
-      Nome: ${deliveryData.nome}
-      Endereço: ${deliveryData.endereco}, ${deliveryData.numero}
-      Cidade: ${deliveryData.cidade}
-      Estado: ${deliveryData.estado}
-      CEP: ${deliveryData.cep}
-      Telefone: ${deliveryData.telefone}
-      E-mail: ${deliveryData.email}
-
-      Itens Comprados:
-      ${itemsDetails}
-
-      Valor do Frete: R$ ${shippingCost.toFixed(2)}`,
-    };
-
-    try {
-      // Enviar e-mail
-      await transporter.sendMail(mailOptions);
-      console.log("E-mail enviado com sucesso!");
-
-      // Redireciona para a página após o envio do e-mail
-      return res.redirect("https://sb-gallery.vercel.app/cart");
-    } catch (error) {
-      console.error("Erro ao enviar o e-mail:", error);
-      // Opcional: Redirecionar mesmo em caso de erro no envio do e-mail
-      return res.redirect("https://sb-gallery.vercel.app/error");
-    }
-  }
-
-  // Redireciona em caso de status diferente de "approved"
-  return res.redirect("https://sb-gallery.vercel.app/home");
-});
 
 const transporter = nodemailer.createTransport({
-  service: "gmail", // ou outro serviço de e-mail que você estiver usando
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, // seu e-mail
-    pass: process.env.EMAIL_PASS, // sua senha ou app password
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
+
+// Função para enviar o e-mail
+export async function sendEmail() {
+  const deliveryData = lastDeliveryData;
+  const shippingCost = lastShipCoast;
+
+  const itemsDetails = lastItems
+    .map((item) => {
+      return `Produto: ${item.title}\nQuantidade: ${
+        item.quantity
+      }\nPreço: R$ ${item.unit_price.toFixed(2)}`;
+    })
+    .join("\n\n");
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: `${deliveryData.email}, ${process.env.EMAIL_USER}`,
+    subject: "Novo Pedido Aprovado",
+    text: `Dados do Endereço:
+    Nome: ${deliveryData.nome}
+    Endereço: ${deliveryData.endereco}, ${deliveryData.numero}
+    Cidade: ${deliveryData.cidade}
+    Estado: ${deliveryData.estado}
+    CEP: ${deliveryData.cep}
+    Telefone: ${deliveryData.telefone}
+    E-mail: ${deliveryData.email}
+
+    Itens Comprados:
+    ${itemsDetails}
+
+    Valor do Frete: R$ ${shippingCost.toFixed(2)}`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("E-mail enviado com sucesso!");
+  } catch (error) {
+    console.error("Erro ao enviar o e-mail:", error);
+  }
+}
 
 // Iniciando o servidor na porta 8080
 app.listen(port, () => {
