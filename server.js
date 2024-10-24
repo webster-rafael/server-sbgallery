@@ -56,7 +56,7 @@ app.post("/create_preference", async (req, res) => {
       auto_return: "all",
       transaction_amount: totalAmount,
       shipments: {
-        cost: 1,
+        cost: 0,
         mode: "not_specified",
         receiver_address: {
           id: "1",
