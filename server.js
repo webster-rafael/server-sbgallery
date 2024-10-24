@@ -48,13 +48,13 @@ app.post("/create_preference", async (req, res) => {
       })),
       back_urls: {
         success: "https://sb-gallery.vercel.app/compraConcluida",
-        failure: "https://sb-gallery.vercel.app/error",
-        pending: "https://sb-gallery.vercel.app/error",
+        failure: "https://sb-gallery.vercel.app/compraConcluida",
+        pending: "https://sb-gallery.vercel.app/compraConcluida",
       },
       auto_return: "all",
       transaction_amount: totalAmount,
       shipments: {
-        cost: 1,
+        cost: lastShipCoast,
         mode: "not_specified",
         receiver_address: {
           id: "1",
