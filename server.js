@@ -181,5 +181,9 @@ export async function sendEmail() {
   }
 }
 
+const server = app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
+});
+
 // Exporte o servidor
 module.exports = server;
