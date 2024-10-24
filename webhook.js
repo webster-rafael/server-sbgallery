@@ -26,9 +26,7 @@ async function connectToDatabase() {
   }
 }
 
-beforeAll(async () => {
-  await connectToDatabase(); // Aguarda a conexão antes de todos os testes
-});
+await connectToDatabase(); // Aguarda a conexão antes de todos os testes
 
 router.post("/", async function (req, res) {
   console.log("POST V1 REQ>BODY");
