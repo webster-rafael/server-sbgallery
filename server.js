@@ -52,7 +52,7 @@ app.post("/create_preference", async (req, res) => {
         pending: "https://sb-gallery.vercel.app/compraConcluida",
       },
       transaction_amount: totalAmount,
-      auto_return: "approved",
+      auto_return: "all",
       shipments: {
         cost: 0,
         mode: "not_specified",

@@ -13,20 +13,6 @@ let lastDeliveryData = null;
 let lastItems = [];
 let lastShipCoast = 0;
 
-async function connectToDatabase() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("Conectado ao MongoDB!");
-  } catch (error) {
-    console.error("Erro ao conectar ao MongoDB:", error);
-  }
-}
-
-await connectToDatabase(); // Aguarda a conexão antes de todos os testes
-
 router.post("/", async function (req, res) {
   console.log("POST V1 REQ>BODY");
   console.log(req.body);
@@ -50,11 +36,14 @@ router.post("/", async function (req, res) {
 
       if (approvedPayments.length > 0) {
         console.log("Pagamentos aprovados:", approvedPayments);
+        if (!lastDeliveryData || !lastDeliveryData.email) {
+          console.error("Dados do endereço incompletos:", lastDeliveryData);
+          return res.status(400).send("Dados do endereço incompletos.");
+        }
         await sendEmail(lastDeliveryData, lastItems, lastShipCoast);
       } else {
         console.log("Nenhum pagamento aprovado.");
       }
-
     } catch (error) {
       if (error.response) {
         console.error(
@@ -71,6 +60,7 @@ router.post("/", async function (req, res) {
   }
 
   res.send("POST OK");
+
 });
 // Função para armazenar dados do pedido
 export function setLastOrderData(deliveryData, items, shippingCost) {
