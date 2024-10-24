@@ -142,7 +142,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Função para enviar o e-mail
-export async function sendEmail() {
+export async function sendEmail(deliveryData, items, shippingCost) {
   const deliveryData = lastDeliveryData;
   const shippingCost = lastShipCoast;
 
@@ -181,7 +181,7 @@ export async function sendEmail() {
   }
 }
 
-// Iniciando o servidor na porta 8080
-app.listen(port, () => {
-  console.log(`O servidor está rodando na porta ${port}`);
-});
+// Exportando a função que o Vercel espera
+export default (req, res) => {
+  app(req, res);
+};
