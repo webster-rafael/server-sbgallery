@@ -53,7 +53,7 @@ app.post("/create_preference", async (req, res) => {
       },
       transaction_amount: totalAmount,
       shipments: {
-        cost: lastShipCoast,
+        cost: 0,
         mode: "not_specified",
         receiver_address: {
           id: "1",
