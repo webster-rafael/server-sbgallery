@@ -47,7 +47,7 @@ app.post("/create_preference", async (req, res) => {
         currency_id: "BRL",
       })),
       back_urls: {
-        success: "https://server-sbgallery.vercel.app/compraConcluida",
+        success: "https://sb-gallery.vercel.app/compraConcluida",
         failure: "https://sb-gallery.vercel.app/error",
         pending: "https://sb-gallery.vercel.app/error",
       },
