@@ -48,8 +48,8 @@ app.post("/create_preference", async (req, res) => {
       })),
       back_urls: {
         success: "https://sb-gallery.vercel.app/compraConcluida",
-        failure: "https://sb-gallery.vercel.app/error",
-        pending: "https://sb-gallery.vercel.app/error",
+        failure: "https://sb-gallery.vercel.app/compraConcluida",
+        pending: "https://sb-gallery.vercel.app/compraConcluida",
       },
       transaction_amount: totalAmount,
       auto_return: "approved",
